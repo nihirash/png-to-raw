@@ -17,7 +17,7 @@ typedef enum {
     RGBA555
 } Mode;
 
-void store565(FILE* f, char R, char G, char B, char A) {
+void store565(FILE* f, char R, char G, char B, unsigned char A) {
     unsigned char r = (R >> 3) & 0x1f;
     unsigned char g = (G >> 2) & 0x3f;
     unsigned char b = (B >> 3) & 0x1f;
@@ -27,7 +27,7 @@ void store565(FILE* f, char R, char G, char B, char A) {
 }
 
 
-void store555(FILE* f, char R, char G, char B, char A) {
+void store555(FILE* f, char R, char G, char B, unsigned char A) {
     unsigned char r = (R >> 3) & 0x1f;
     unsigned char g = (G >> 3) & 0x1f;
     unsigned char b = (B >> 3) & 0x1f;
@@ -37,13 +37,13 @@ void store555(FILE* f, char R, char G, char B, char A) {
     fputc((word & 0xff), f);
 }
 
-void store888(FILE* f, char R, char G, char B, char A) {
+void store888(FILE* f, char R, char G, char B, unsigned char A) {
     fputc(B, f);
     fputc(G, f);
     fputc(R, f);
 }
 
-void storeA888(FILE *f, char R, char G, char B, char A) {
+void storeA888(FILE *f, char R, char G, char B, unsigned char A) {
     fputc(A, f);
     fputc(B, f);
     fputc(G, f);
