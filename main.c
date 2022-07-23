@@ -27,7 +27,7 @@ void store565(FILE* f, char R, char G, char B, unsigned char A) {
 }
 
 
-void store555(FILE* f, char R, char G, char B, unsigned char A) {
+void store555(FILE* f, unsigned char R, unsigned char G, unsigned char B, unsigned char A) {
     unsigned char r = (R >> 3) & 0x1f;
     unsigned char g = (G >> 3) & 0x1f;
     unsigned char b = (B >> 3) & 0x1f;
@@ -50,7 +50,7 @@ void storeA888(FILE *f, char R, char G, char B, unsigned char A) {
     fputc(R, f);
 }
 
-void convert_png(char *filename, char *output_filename, Mode mode) {
+void convert_png(char *filename, char *output_filename, Mode mode, int noise) {
     unsigned error;
     unsigned char *image ;
     unsigned width, height;
@@ -71,6 +71,20 @@ void convert_png(char *filename, char *output_filename, Mode mode) {
                 unsigned char G = image[offset*4 + 1];
                 unsigned char R = image[offset*4 + 2];
                 unsigned char A = image[offset*4 + 3];
+
+                if (noise) {
+                        unsigned int RR = R + (rand() & 15);
+                        unsigned int GG = G + (rand() & 15);
+                        unsigned int BB = B + (rand() & 15);
+
+                        if (RR > 0xff) RR = 0xff;
+                        if (GG > 0xff) GG = 0xff;
+                        if (BB > 0xff) BB = 0xff;
+
+                        R = RR & 0xff;
+                        G = GG & 0xff;
+                        B = BB & 0xff;
+                }
 
                 switch(mode) {
                     case RGB565:
@@ -102,12 +116,13 @@ void convert_png(char *filename, char *output_filename, Mode mode) {
 
 int main(int argc, char **args) {
     printf("PNG to SAGA raw chunks converter by Nihirash\n");
-    printf("v.1.0 21 Jun 2022\n");
-    if (argc < 4) {
-        printf("usage: %s MODE input.png output.raw\n", args[0]);
+    printf("v.1.1 23 Jul 2022\n");
+    if (argc < 5) {
+        printf("usage: %s MODE NOISE input.png output.raw\n", args[0]);
         printf(" Where MODE is:\n");
         printf("  * 888 - RGB888\n  * A888 - ARGB888\n  * 565 - RGB565\n  * 555 - RGBA555\n");
-        
+        printf(" Where NOISE is:\n  * N - add no noise\n  * Y - add noise\n\n");
+
         return 1;
     } 
     
@@ -121,8 +136,18 @@ int main(int argc, char **args) {
         
         return 1;
     }
+
+    int noise = 0;
+
+    if (args[2][0] == 'N') noise = 0;
+    else if (args[2][0] == 'Y') noise = 1;
+    else {
+        printf("Enable or disable noise\n");
+
+        return 1;
+    }
     
-    convert_png(args[2], args[3], m);
+    convert_png(args[3], args[4], m, noise);
 
     return 0;
 }
